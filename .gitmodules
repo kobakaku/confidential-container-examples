@@ -1,0 +1,3 @@
+[submodule "confidential-ai"]
+	path = confidential-ai
+	url = git@github.com:kobakaku/confidential-ai.git

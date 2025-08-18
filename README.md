@@ -8,10 +8,19 @@ Azure Confidential Containers provide a secure environment for running container
 
 ## Examples
 
-### 1. Hello World (Rust)
+### 1. Hello World
 
-A minimal Rust web application that demonstrates:
+A minimal web application that demonstrates:
 
 - Attestation report retrieval and display
 
 **Location**: `/hello-world`
+
+### 2. Confidential AI
+
+Documentation and examples for confidential AI inference workflows:
+
+- Sequence diagrams for confidential inference patterns
+- Best practices for secure AI model deployment
+
+**Location**: `/confidential-ai` (submodule, fork of [microsoft/confidential-ai](https://github.com/microsoft/confidential-ai))

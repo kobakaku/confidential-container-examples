@@ -1,0 +1,45 @@
+{
+  "version": "1.0",
+  "containers": [
+    {
+      "containerImage": "$CONTAINER_IMAGE",
+      "environmentVariables": [
+        {
+          "name": "MAA_ENDPOINT",
+          "value": ".*",
+          "strategy": "re2"
+        },
+        {
+          "name": "SKR_PORT",
+          "value": ".+",
+          "strategy": "re2"
+        },
+        {
+          "name": "PORT",
+          "value": ".+",
+          "strategy": "re2"
+        },
+        {
+          "name": "GITHUB_TOKEN",
+          "value": ".*",
+          "strategy": "re2"
+        },
+        {
+          "name": "RUST_LOG",
+          "value": ".*",
+          "strategy": "re2"
+        }
+      ],
+      "command": [
+        "./github-activity-verifier"
+      ]
+    },
+    {
+      "containerImage": "mcr.microsoft.com/aci/skr:2.7",
+      "command": [
+        "/skr.sh"
+      ],
+      "environmentVariables": []
+    }
+  ]
+}

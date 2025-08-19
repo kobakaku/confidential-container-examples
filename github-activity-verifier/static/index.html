@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Activity Verifier</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 GitHub Activity Verifier</h1>
+        <p class="subtitle">Verify GitHub activity in a Trusted Execution Environment</p>
+        
+        <!-- 検証フォーム -->
+        <div id="verification-form">
+            <div class="form-group">
+                <label for="github-username">GitHub Username:</label>
+                <input type="text" id="github-username" placeholder="octocat" required>
+                <small>Enter a valid GitHub username (3-39 characters)</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Verification Type:</label>
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="verification-type" value="yearly_commits" checked>
+                        <span>365+ Commits/Year</span>
+                        <small>Verify at least 365 commits in the last year</small>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="verification-type" value="consecutive_days">
+                        <span>100+ Days Streak</span>
+                        <small>Verify longest consecutive activity streak</small>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="verification-type" value="total_stars">
+                        <span>1000+ Total Stars</span>
+                        <small>Verify total stars across all repositories</small>
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="verification-type" value="public_repos">
+                        <span>10+ Public Repos</span>
+                        <small>Verify number of public repositories</small>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="threshold">Custom Threshold (optional):</label>
+                <input type="number" id="threshold" placeholder="Leave empty for default" min="1" max="10000">
+                <small>Override the default threshold for verification</small>
+            </div>
+            
+            <button id="verify-btn" class="btn btn-primary">
+                <span class="btn-text">Verify Activity</span>
+                <span class="btn-spinner" style="display: none;">⏳</span>
+            </button>
+        </div>
+        
+        <!-- 証明書詳細 -->
+        <div id="proof-details" style="display: none;">
+            <div class="certificate">
+                <div class="cert-header">
+                    <h2>📋 Verification Certificate</h2>
+                    <div id="verification-status" class="status-badge"></div>
+                </div>
+                
+                <div class="cert-body">
+                    <div class="cert-field">
+                        <label>👤 User:</label>
+                        <span id="proof-username" class="value"></span>
+                    </div>
+                    
+                    <div class="cert-field">
+                        <label>📊 Criteria:</label>
+                        <span id="proof-criteria" class="value"></span>
+                    </div>
+                    
+                    <div class="cert-field">
+                        <label>✅ Result:</label>
+                        <span id="proof-result" class="value"></span>
+                    </div>
+                    
+                    <div class="cert-field">
+                        <label>🕒 Verified At:</label>
+                        <span id="proof-timestamp" class="value"></span>
+                    </div>
+                    
+                    <!-- TEE Attestation Section with Tabs -->
+                    <div id="tee-section" class="tee-section" style="display: none;">
+                        <div class="tab-navigation">
+                            <button class="tab-btn active" data-tab="token">🎫 MAA Token</button>
+                            <button class="tab-btn" data-tab="claims">📊 Token Claims</button>
+                            <button class="tab-btn" data-tab="raw">📋 Raw JSON</button>
+                        </div>
+                        
+                        <div id="token-tab" class="tab-content active">
+                            <h4>Microsoft Azure Attestation Token</h4>
+                            <div id="token-status" class="token-status"></div>
+                            <div id="token-raw" class="token-raw"></div>
+                        </div>
+                        
+                        <div id="claims-tab" class="tab-content">
+                            <h4>JWT Token Claims</h4>
+                            <div id="claims-grid" class="claims-grid"></div>
+                        </div>
+                        
+                        <div id="raw-tab" class="tab-content">
+                            <h4>Complete JSON Response</h4>
+                            <div id="raw-json" class="raw-json"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="cert-field">
+                        <label>📋 Proof Hash:</label>
+                        <span id="proof-hash" class="value hash"></span>
+                    </div>
+                </div>
+                
+                <div class="cert-actions">
+                    <div class="share-section">
+                        <label for="share-link">Share this certificate:</label>
+                        <div class="share-controls">
+                            <input type="text" id="share-link" readonly>
+                            <button id="copy-link-btn" class="btn btn-secondary">📋 Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="new-verification-btn" class="btn btn-primary">🔄 New Verification</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ローディング表示 -->
+        <div id="loading" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h3>Verifying GitHub Activity...</h3>
+                <p>This may take a few seconds while we:</p>
+                <ul>
+                    <li>Fetch your GitHub activity data</li>
+                    <li>Analyze your contribution patterns</li>
+                    <li>Generate TEE attestation proof</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- エラー表示 -->
+        <div id="error" style="display: none;">
+            <div class="error-content">
+                <h3>❌ Verification Failed</h3>
+                <div class="error-message"></div>
+                <button id="retry-btn" class="btn btn-secondary">🔄 Try Again</button>
+            </div>
+        </div>
+        
+        <!-- フッター -->
+        <footer class="footer">
+            <p>Powered by 
+                <a href="https://www.rust-lang.org/" target="_blank">Rust</a>, 
+                <a href="https://actix.rs/" target="_blank">Actix Web</a>, and 
+                <a href="https://docs.microsoft.com/azure/attestation/" target="_blank">Azure Attestation</a>
+            </p>
+            <p>🔒 Running in Azure Confidential Container Environment</p>
+        </footer>
+    </div>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>

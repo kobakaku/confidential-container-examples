@@ -16,7 +16,17 @@ A minimal web application that demonstrates:
 
 **Location**: `/hello-world`
 
-### 2. Confidential AI
+### 2. GitHub Activity Verifier
+
+A comprehensive web application for verifying GitHub user activity with TEE attestation:
+
+- Real-time GitHub activity verification
+- Multiple verification criteria (public repos, yearly commits, consecutive days, total stars)
+- TEE environment attestation with MAA integration
+
+**Location**: `/github-activity-verifier`
+
+### 3. Confidential AI
 
 Documentation and examples for confidential AI inference workflows:
 

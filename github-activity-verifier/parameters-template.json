@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "value": "github-activity-verifier"
+        },
+        "location": {
+            "value": "${LOCATION}"
+        },
+        "appImage": {
+            "value": "${ACR_FQDN}/github-activity-verifier:latest"
+        },
+        "maaEndpoint": {
+            "value": "${MAA_ENDPOINT}"
+        },
+        "acrLoginServer": {
+            "value": "${ACR_FQDN}"
+        },
+        "acrUsername": {
+            "value": "${ACR_USERNAME}"
+        },
+        "acrPassword": {
+            "value": "${ACR_PASSWORD}"
+        },
+        "ccePolicy": {
+            "value": "${CCE_POLICY}"
+        }
+    }
+}

@@ -1,0 +1,187 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "defaultValue": "github-activity-verifier",
+      "metadata": {
+        "description": "Name for the container group"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "North Europe",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "appImage": {
+      "type": "string",
+      "defaultValue": "your-registry/github-activity-verifier:latest",
+      "metadata": {
+        "description": "GitHub Activity Verifier container image"
+      }
+    },
+    "maaEndpoint": {
+      "type": "string",
+      "metadata": {
+        "description": "Microsoft Azure Attestation endpoint URL (required)"
+      }
+    },
+    "acrLoginServer": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ACR login server (e.g., myacr.azurecr.io). Leave empty for public images."
+      }
+    },
+    "acrUsername": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ACR username. Leave empty for managed identity."
+      }
+    },
+    "acrPassword": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "ACR password. Leave empty for managed identity."
+      }
+    },
+    "cpuCores": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "The number of CPU cores to allocate to the main container."
+      }
+    },
+    "memoryInGb": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "The amount of memory to allocate to the main container in gigabytes."
+      }
+    },
+    "restartPolicy": {
+      "type": "string",
+      "defaultValue": "Never",
+      "allowedValues": [
+        "Always",
+        "Never",
+        "OnFailure"
+      ],
+      "metadata": {
+        "description": "The behavior of Azure runtime if container has stopped."
+      }
+    },
+    "ccePolicy": {
+      "type": "string",
+      "metadata": {
+        "description": "Confidential Container Environment policy"
+      }
+    }
+  },
+  "variables": {
+    "imageRegistryCredentials": [
+      {
+        "server": "[parameters('acrLoginServer')]",
+        "username": "[parameters('acrUsername')]",
+        "password": "[parameters('acrPassword')]"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('name')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "confidentialComputeProperties": {
+          "isolationType": "SevSnp",
+          "ccePolicy": "[parameters('ccePolicy')]"
+        },
+        "sku": "Confidential",
+        "containers": [
+          {
+            "name": "github-activity-verifier",
+            "properties": {
+              "image": "[parameters('appImage')]",
+              "environmentVariables": [
+                {
+                  "name": "MAA_ENDPOINT",
+                  "value": "[parameters('maaEndpoint')]"
+                },
+                {
+                  "name": "PORT",
+                  "value": "9000"
+                },
+                {
+                  "name": "SKR_PORT",
+                  "value": "8080"
+                }
+              ],
+              "ports": [
+                {
+                  "port": 9000,
+                  "protocol": "TCP"
+                }
+              ],
+              "resources": {
+                "requests": {
+                  "cpu": "[parameters('cpuCores')]",
+                  "memoryInGB": "[parameters('memoryInGb')]"
+                }
+              }
+            }
+          },
+          {
+            "name": "skr-sidecar",
+            "properties": {
+              "image": "mcr.microsoft.com/aci/skr:2.7",
+              "command": [
+                "/skr.sh"
+              ],
+              "ports": [
+                {
+                  "port": 8080,
+                  "protocol": "TCP"
+                }
+              ],
+              "resources": {
+                "requests": {
+                  "cpu": 0.2,
+                  "memoryInGB": 0.5
+                }
+              }
+            }
+          }
+        ],
+        "osType": "Linux",
+        "restartPolicy": "[parameters('restartPolicy')]",
+        "ipAddress": {
+          "type": "Public",
+          "ports": [
+            {
+              "port": 9000,
+              "protocol": "TCP"
+            }
+          ]
+        },
+        "imageRegistryCredentials": "[if(equals(parameters('acrUsername'),''), json('null'), variables('imageRegistryCredentials'))]"
+      }
+    }
+  ],
+  "outputs": {
+    "containerIPv4Address": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups', parameters('name'))).ipAddress.ip]"
+    },
+    "maaEndpoint": {
+      "type": "string",
+      "value": "[parameters('maaEndpoint')]"
+    }
+  }
+}

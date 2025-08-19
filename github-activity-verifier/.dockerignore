@@ -1,0 +1,27 @@
+# Git files
+.git
+.gitignore
+
+# Documentation
+*.md
+README.md
+
+# Development files
+.vscode
+.idea
+*.log
+
+# Build artifacts
+target/
+Cargo.lock
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Azure deployment files
+*.json
+*.sh
+policy.rego
+policy.base64
